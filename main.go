@@ -1,6 +1,8 @@
 package main
 
 import (
+	"reflect"
+
 	"github.com/k0kubun/pp/v3"
 )
 
@@ -16,13 +18,23 @@ var (
 )
 
 func main() {
-	defer func() {
-		pp.Println("realties", realties)
-		pp.Println("visitors", visitors)
-		pp.Println("schedules", schedules)
-	}()
-
 	if err := Feed(&realties, &visitors, &schedules); err != nil {
 		panic(err)
 	}
+
+	pp.Println("initial schedules", schedules)
+
+	keys := reflect.ValueOf(schedules).MapKeys()
+
+	toRemove := schedules[keys[1].String()]
+	if err := schedules.Remove(toRemove); err != nil {
+		panic(err)
+	}
+
+	toConfirm := schedules[keys[0].String()]
+	if err := schedules.Confirm(toConfirm); err != nil {
+		panic(err)
+	}
+
+	pp.Println("final schedules", schedules)
 }

@@ -2,9 +2,21 @@ package main
 
 import (
 	"time"
+
+	"github.com/k0kubun/pp/v3"
 )
 
 func Feed(realties *[]Realty, visitors *[]Visitor, a *Agenda) error {
+	runDefer := true
+
+	defer func() {
+		if runDefer {
+			pp.Println("realties", realties)
+			pp.Println("visitors", visitors)
+			pp.Println("schedules", schedules)
+		}
+	}()
+
 	*realties = []Realty{
 		{ID: 10},
 		{ID: 20},
@@ -44,6 +56,8 @@ func Feed(realties *[]Realty, visitors *[]Visitor, a *Agenda) error {
 	if err := a.Add(schedule3); err != nil {
 		return err
 	}
+
+	runDefer = false
 
 	return nil
 }
