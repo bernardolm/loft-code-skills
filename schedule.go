@@ -3,11 +3,7 @@ package main
 import (
 	"fmt"
 	"time"
-
-	"github.com/k0kubun/pp/v3"
 )
-
-
 
 type Schedule struct {
 	IDRealty  int
@@ -36,5 +32,3 @@ func (v Schedule) String() string {
 	return fmt.Sprintf("im: %d | vs: %d | in: %s | fm: %s\n",
 		v.IDRealty, v.IDVisitor, v.BeginF(), v.EndF())
 }
-
-
