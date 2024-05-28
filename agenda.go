@@ -15,15 +15,15 @@ func (a Agenda) Add(new Schedule) error {
 	errorMsg := "schedule from %s to %s at realty %d already scheduled to visitor %d\n"
 
 	if a, ok := a[new.ID()]; ok {
-		return fmt.Errorf(errorMsg, new.BeginF(), new.EndF(), new.IDRealty, a.IDVisitor)
+		return fmt.Errorf(errorMsg, new.BeginF(), new.EndF(), new.Realty.ID, a.Visitor.ID)
 	}
 
 	for _, schedule := range a {
-		if schedule.IDRealty == new.IDRealty {
+		if schedule.Realty.ID == new.Realty.ID {
 			if new.Begin.Equal(schedule.Begin) ||
 				(new.Begin.After(schedule.Begin) && new.Begin.Before(schedule.End)) ||
 				(new.Begin.Before(schedule.Begin) && new.End.After(schedule.Begin)) {
-				return fmt.Errorf(errorMsg, new.BeginF(), new.EndF(), new.IDRealty, new.IDVisitor)
+				return fmt.Errorf(errorMsg, new.BeginF(), new.EndF(), new.Realty.ID, new.Visitor.ID)
 			}
 		}
 	}
@@ -38,7 +38,7 @@ func (a Agenda) Add(new Schedule) error {
 func (a Agenda) Remove(schedule Schedule) error {
 	if _, ok := a[schedule.ID()]; !ok {
 		return fmt.Errorf("there isn't a schedule from %s to %s at realty %d\n",
-			schedule.BeginF(), schedule.EndF(), schedule.IDRealty)
+			schedule.BeginF(), schedule.EndF(), schedule.Realty.ID)
 	}
 
 	delete(a, schedule.ID())
@@ -49,7 +49,7 @@ func (a Agenda) Remove(schedule Schedule) error {
 func (a Agenda) Confirm(schedule Schedule) error {
 	if _, ok := a[schedule.ID()]; !ok {
 		return fmt.Errorf("there isn't a schedule from %s to %s at realty %d\n",
-			schedule.BeginF(), schedule.EndF(), schedule.IDRealty)
+			schedule.BeginF(), schedule.EndF(), schedule.Realty.ID)
 	}
 
 	ag := a[schedule.ID()]

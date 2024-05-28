@@ -11,17 +11,15 @@ import (
 // req 2: permitir que uma visita agendada seja cancelada
 // req 3: registrar que uma visita agendada foi realmente realizada
 
-type Realty struct {
-	id int
-}
-
-type Visitor struct {
-	id int
-}
-
 var (
-	realties = []Realty{}
-	visitors = []Visitor{}
+	realties = []Realty{
+		{ID: 10},
+		{ID: 20},
+	}
+	visitors = []Visitor{
+		{ID: 30},
+		{ID: 40},
+	}
 )
 
 func main() {
@@ -30,7 +28,7 @@ func main() {
 
 	schedules := make(Agenda)
 
-	if err := feed(schedules); err != nil {
+	if err := Feed(realties, visitors, schedules); err != nil {
 		panic(err)
 	}
 
