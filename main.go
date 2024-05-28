@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/k0kubun/pp/v3"
 )
 
@@ -12,25 +10,19 @@ import (
 // req 3: registrar que uma visita agendada foi realmente realizada
 
 var (
-	realties = []Realty{
-		{ID: 10},
-		{ID: 20},
-	}
-	visitors = []Visitor{
-		{ID: 30},
-		{ID: 40},
-	}
+	realties  = []Realty{}
+	visitors  = []Visitor{}
+	schedules = make(Agenda)
 )
 
 func main() {
-	fmt.Println(realties)
-	fmt.Println(visitors)
+	defer func() {
+		pp.Println("realties", realties)
+		pp.Println("visitors", visitors)
+		pp.Println("schedules", schedules)
+	}()
 
-	schedules := make(Agenda)
-
-	if err := Feed(realties, visitors, schedules); err != nil {
+	if err := Feed(&realties, &visitors, &schedules); err != nil {
 		panic(err)
 	}
-
-	pp.Printf("schedules:\n%#v\n", schedules)
 }
