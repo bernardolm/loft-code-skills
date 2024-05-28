@@ -7,10 +7,10 @@ import (
 )
 
 func Feed(realties *[]Realty, visitors *[]Visitor, a *Agenda) error {
-	runDefer := true
+	printDataUntilNow := true
 
 	defer func() {
-		if runDefer {
+		if printDataUntilNow {
 			pp.Println("realties", realties)
 			pp.Println("visitors", visitors)
 			pp.Println("schedules", schedules)
@@ -57,7 +57,7 @@ func Feed(realties *[]Realty, visitors *[]Visitor, a *Agenda) error {
 		return err
 	}
 
-	runDefer = false
+	printDataUntilNow = false
 
 	return nil
 }
