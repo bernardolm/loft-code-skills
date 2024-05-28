@@ -1,4 +1,4 @@
-module github.com/bernardolm/dotfiles/sandbox/loft-code-skills
+module github.com/bernardolm/loft-code-skills
 
 go 1.22.2
 
