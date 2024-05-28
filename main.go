@@ -12,145 +12,145 @@ import (
 // req 2: permitir que uma visita agendada seja cancelada
 // req 3: registrar que uma visita agendada foi realmente realizada
 
-type Imovel struct {
+type Realty struct {
 	id int
 }
 
-type Visitante struct {
+type Visitor struct {
 	id int
 }
 
-type Agendamento struct {
-	IDImovel    int
-	IDVisitante int
-	Inicio      time.Time
-	Fim         time.Time
-	Realizado   bool
+type Schedule struct {
+	IDRealty  int
+	IDVisitor int
+	Begin     time.Time
+	End       time.Time
+	Realized  bool
 }
 
-func (v Agendamento) ID() string {
+func (v Schedule) ID() string {
 	return fmt.Sprintf("%d_%s_%s",
-		v.IDImovel,
-		v.Inicio.Format("060102-0304"),
-		v.Fim.Format("060102-0304"))
+		v.IDRealty,
+		v.Begin.Format("060102-0304"),
+		v.End.Format("060102-0304"))
 }
 
-func (v Agendamento) InicioF() string {
-	return v.Inicio.Format("02/01/2006 03h04")
+func (v Schedule) BeginF() string {
+	return v.Begin.Format("02/01/2006 03h04")
 }
 
-func (v Agendamento) FimF() string {
-	return v.Fim.Format("02/01/2006 03h04")
+func (v Schedule) EndF() string {
+	return v.End.Format("02/01/2006 03h04")
 }
 
-func (v Agendamento) String() string {
+func (v Schedule) String() string {
 	return fmt.Sprintf("im: %d | vs: %d | in: %s | fm: %s\n",
-		v.IDImovel, v.IDVisitante, v.InicioF(), v.FimF())
+		v.IDRealty, v.IDVisitor, v.BeginF(), v.EndF())
 }
 
-type Agendamentos map[string]Agendamento
+type Agenda map[string]Schedule
 
-func (a Agendamentos) Add(novo Agendamento) error {
-	if novo.Inicio.Equal(novo.Fim) {
-		return fmt.Errorf("horário %s às %s inválido\n",
-			novo.InicioF(), novo.FimF())
+func (a Agenda) Add(new Schedule) error {
+	if new.Begin.Equal(new.End) {
+		return fmt.Errorf("schedule from %s to %s is invalid\n",
+			new.BeginF(), new.EndF())
 	}
 
-	if a, ok := a[novo.ID()]; ok {
-		return fmt.Errorf("horário %s às %s no imóvel %d já agendado para o visitante %d\n",
-			novo.InicioF(), novo.FimF(), novo.IDImovel, a.IDVisitante)
+	errorMsg := "schedule from %s to %s at realty %d already scheduled to visitor %d\n"
+
+	if a, ok := a[new.ID()]; ok {
+		return fmt.Errorf(errorMsg, new.BeginF(), new.EndF(), new.IDRealty, a.IDVisitor)
 	}
 
-	for _, agendamento := range a {
-		if agendamento.IDImovel == novo.IDImovel {
-			if novo.Inicio.Equal(agendamento.Inicio) ||
-				(novo.Inicio.After(agendamento.Inicio) && novo.Inicio.Before(agendamento.Fim)) ||
-				(novo.Inicio.Before(agendamento.Inicio) && novo.Fim.After(agendamento.Inicio)) {
-				return fmt.Errorf("horário %s às %s no imóvel %d já agendado para o visitante %d\n",
-					novo.InicioF(), novo.FimF(), novo.IDImovel, novo.IDVisitante)
+	for _, schedule := range a {
+		if schedule.IDRealty == new.IDRealty {
+			if new.Begin.Equal(schedule.Begin) ||
+				(new.Begin.After(schedule.Begin) && new.Begin.Before(schedule.End)) ||
+				(new.Begin.Before(schedule.Begin) && new.End.After(schedule.Begin)) {
+				return fmt.Errorf(errorMsg, new.BeginF(), new.EndF(), new.IDRealty, new.IDVisitor)
 			}
 		}
 	}
 
-	novoCopy := novo
+	newCopy := new
 
-	a[novoCopy.ID()] = novoCopy
-
-	return nil
-}
-
-func (a Agendamentos) Remove(agendamento Agendamento) error {
-	if _, ok := a[agendamento.ID()]; !ok {
-		return fmt.Errorf("não existe agendamento no horário de %s às %s no imóvel %d\n",
-			agendamento.InicioF(), agendamento.FimF(), agendamento.IDImovel)
-	}
-
-	delete(a, agendamento.ID())
+	a[newCopy.ID()] = newCopy
 
 	return nil
 }
 
-func (a Agendamentos) Confirm(agendamento Agendamento) error {
-	if _, ok := a[agendamento.ID()]; !ok {
-		return fmt.Errorf("não existe agendamento no horário de %s às %s no imóvel %d\n",
-			agendamento.InicioF(), agendamento.FimF(), agendamento.IDImovel)
+func (a Agenda) Remove(schedule Schedule) error {
+	if _, ok := a[schedule.ID()]; !ok {
+		return fmt.Errorf("there isn't a schedule from %s to %s at realty %d\n",
+			schedule.BeginF(), schedule.EndF(), schedule.IDRealty)
 	}
 
-	ag := a[agendamento.ID()]
-	ag.Realizado = true
-	a[agendamento.ID()] = ag
+	delete(a, schedule.ID())
+
+	return nil
+}
+
+func (a Agenda) Confirm(schedule Schedule) error {
+	if _, ok := a[schedule.ID()]; !ok {
+		return fmt.Errorf("there isn't a schedule from %s to %s at realty %d\n",
+			schedule.BeginF(), schedule.EndF(), schedule.IDRealty)
+	}
+
+	ag := a[schedule.ID()]
+	ag.Realized = true
+	a[schedule.ID()] = ag
 
 	return nil
 }
 
 var (
-	apartamentos = []Imovel{}
-	visitantes   = []Visitante{}
+	realties = []Realty{}
+	visitors = []Visitor{}
 )
 
-func feed(a Agendamentos) error {
-	agendamento1 := Agendamento{
-		IDImovel:    10,
-		IDVisitante: 20,
-		Inicio:      time.Date(2024, 05, 28, 13, 20, 0, 0, time.Local),
+func feed(a Agenda) error {
+	schedule1 := Schedule{
+		IDRealty:  10,
+		IDVisitor: 20,
+		Begin:     time.Date(2024, 05, 28, 13, 20, 0, 0, time.Local),
 	}
-	agendamento1.Fim = agendamento1.Inicio.Add(1 * time.Hour)
-	if err := a.Add(agendamento1); err != nil {
-		return fmt.Errorf("não foi possível adicionar o agendamento: %#v", agendamento1)
-	}
-
-	agendamento2 := Agendamento{
-		IDImovel:    30,
-		IDVisitante: 40,
-		Inicio:      time.Date(2024, 05, 28, 13, 20, 0, 0, time.Local),
-	}
-	agendamento2.Fim = agendamento2.Inicio.Add(1 * time.Hour)
-	if err := a.Add(agendamento2); err != nil {
-		return fmt.Errorf("não foi possível adicionar o agendamento: %#v", agendamento2)
+	schedule1.End = schedule1.Begin.Add(1 * time.Hour)
+	if err := a.Add(schedule1); err != nil {
+		panic(err)
 	}
 
-	agendamento3 := Agendamento{
-		IDImovel:    30,
-		IDVisitante: 50,
-		Inicio:      time.Date(2024, 05, 28, 13, 20, 0, 0, time.Local),
+	schedule2 := Schedule{
+		IDRealty:  30,
+		IDVisitor: 40,
+		Begin:     time.Date(2024, 05, 28, 13, 20, 0, 0, time.Local),
 	}
-	agendamento3.Fim = agendamento1.Inicio.Add(1 * time.Hour)
-	if err := a.Add(agendamento3); err != nil {
-		return fmt.Errorf("não foi possível adicionar o agendamento: %#v", agendamento3)
+	schedule2.End = schedule2.Begin.Add(1 * time.Hour)
+	if err := a.Add(schedule2); err != nil {
+		panic(err)
+	}
+
+	schedule3 := Schedule{
+		IDRealty:  30,
+		IDVisitor: 50,
+		Begin:     time.Date(2024, 05, 28, 13, 20, 0, 0, time.Local),
+	}
+	schedule3.End = schedule1.Begin.Add(1 * time.Hour)
+	if err := a.Add(schedule3); err != nil {
+		panic(err)
 	}
 
 	return nil
 }
 
 func main() {
-	fmt.Println(apartamentos)
-	fmt.Println(visitantes)
+	fmt.Println(realties)
+	fmt.Println(visitors)
 
-	agendamentos := make(Agendamentos)
+	schedules := make(Agenda)
 
-	if err := feed(agendamentos); err != nil {
+	if err := feed(schedules); err != nil {
 		panic(err)
 	}
 
-	pp.Printf("%#v\n", agendamentos)
+	pp.Printf("schedules:\n%#v\n", schedules)
 }
